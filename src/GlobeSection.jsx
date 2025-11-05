@@ -81,6 +81,7 @@ export default function GlobeSection({ isDark, onSectionSelect }) {
   const [landPolygons, setLandPolygons] = useState([]);
   const [hoveredContinent, setHoveredContinent] = useState(null);
   const [isRotating, setIsRotating] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Sync with parent-provided dark mode when available
   useEffect(() => {
@@ -94,7 +95,9 @@ export default function GlobeSection({ isDark, onSectionSelect }) {
       .then((res) => res.json())
       .then((data) => {
         setLandPolygons(data.features);
-      });
+        setIsLoading(false);
+      })
+      .catch(() => setIsLoading(false));
   }, []);
 
   useEffect(() => {
@@ -145,6 +148,14 @@ export default function GlobeSection({ isDark, onSectionSelect }) {
 
   return (
     <section className="w-full h-screen flex flex-col items-center justify-center relative">
+      {isLoading && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-50 bg-brand-light dark:bg-brand-dark">
+          <div className="relative">
+            <div className="w-16 h-16 border-4 border-brand-blue/20 border-t-brand-blue rounded-full animate-spin"></div>
+          </div>
+          <p className="mt-4 text-brand-blue font-semibold text-lg">Loading Globe...</p>
+        </div>
+      )}
       <div className="w-full h-screen absolute top-0 left-0 flex items-center justify-center">
         <Globe
           ref={globeRef}
