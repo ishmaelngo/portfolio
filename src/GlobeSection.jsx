@@ -80,8 +80,9 @@ export default function GlobeSection({ isDark, onSectionSelect }) {
   const globeRef = useRef();
   const [landPolygons, setLandPolygons] = useState([]);
   const [hoveredContinent, setHoveredContinent] = useState(null);
-  const [isRotating, setIsRotating] = useState(true);
+  const [isRotating, setIsRotating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const idleTimerRef = useRef(null);
 
   // Sync with parent-provided dark mode when available
   useEffect(() => {
@@ -107,6 +108,33 @@ export default function GlobeSection({ isDark, onSectionSelect }) {
     }
   }, [isRotating]);
 
+  useEffect(() => {
+    const resetIdleTimer = () => {
+      if (idleTimerRef.current) {
+        clearTimeout(idleTimerRef.current);
+      }
+
+      if (!isRotating) {
+        setIsRotating(true);
+      }
+
+      idleTimerRef.current = setTimeout(() => {
+        setIsRotating(false);
+      }, 5000);
+    };
+
+    window.addEventListener('mousemove', resetIdleTimer);
+    window.addEventListener('touchstart', resetIdleTimer);
+
+    return () => {
+      window.removeEventListener('mousemove', resetIdleTimer);
+      window.removeEventListener('touchstart', resetIdleTimer);
+      if (idleTimerRef.current) {
+        clearTimeout(idleTimerRef.current);
+      }
+    };
+  }, [isRotating]);
+
   // Polygon color based on continent & dark mode
   const polygonCapColor = (feat) => {
     const cont = getContinent(feat);
@@ -129,11 +157,13 @@ export default function GlobeSection({ isDark, onSectionSelect }) {
       console.log('Detected continent:', continent); // Debug log
       if (continentSections[continent]) {
         setHoveredContinent(continent);
-        setIsRotating(false); // Stop rotation on hover
+        if (idleTimerRef.current) {
+          clearTimeout(idleTimerRef.current);
+        }
+        setIsRotating(false);
       }
     } else {
       setHoveredContinent(null);
-      setIsRotating(true); // Resume rotation when not hovering
     }
   };
 
