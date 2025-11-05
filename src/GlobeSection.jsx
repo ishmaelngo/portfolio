@@ -114,9 +114,7 @@ export default function GlobeSection({ isDark, onSectionSelect }) {
         clearTimeout(idleTimerRef.current);
       }
 
-      if (!isRotating) {
-        setIsRotating(true);
-      }
+      setIsRotating(true);
 
       idleTimerRef.current = setTimeout(() => {
         setIsRotating(false);
@@ -133,7 +131,7 @@ export default function GlobeSection({ isDark, onSectionSelect }) {
         clearTimeout(idleTimerRef.current);
       }
     };
-  }, [isRotating]);
+  }, []);
 
   // Polygon color based on continent & dark mode
   const polygonCapColor = (feat) => {
